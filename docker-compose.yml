@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  db:
+    container_name: letterpack-db
+    image: mysql:5.7
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      TZ: "Asia/Tokyo"
+    volumes:
+      - "./db/init:/docker-entrypoint-initdb.d"
+    ports:
+      - "3306:3306"
+    # restart: always
+    networks:
+      - default
+
+  nginx:
+    container_name: letterpack-nginx
+    image: letterpack-nginx-dev
+    environment:
+      TZ: Asia/Tokyo
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    links:
+      - go
+  go:
+    container_name: letterpack-go
+    image: letterpack-go-dev
+    volumes:
+      - ./go/src:/var/app/src
+    command: bash -c "cd /var/app/src && realize start --server"
+
+networks:
+  default:

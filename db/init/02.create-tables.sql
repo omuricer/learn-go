@@ -1,4 +1,4 @@
-USE `account_db`;
+USE `letter`;
 SET CHARACTER_SET_CLIENT = utf8mb4;
 SET CHARACTER_SET_CONNECTION = utf8mb4;
 
@@ -673,3 +673,24 @@ CREATE TABLE `account_macaddresses` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='アカウント・MACアドレス関連';
 create index index_account_macaddresses_accounts_id on account_macaddresses(accounts_id);
+
+--
+-- Table structure for table `letters`
+--
+DROP TABLE IF EXISTS `letters`;
+CREATE TABLE `letters` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `from` varchar(256) NOT NULL COMMENT '差出人',
+  `from_mail` varchar(256) NOT NULL COMMENT '差出人メールアドレス',
+  `file` varchar(256) NOT NULL COMMENT 'ファイル名',
+  `inner_file_path` varchar(256) NOT NULL COMMENT '内部ファイルパス',
+  `decrypt_key` varchar(256) NOT NULL COMMENT '解錠キー',
+  `expire` datetime COMMENT '有効期限',
+  `expired_at` datetime COMMENT '有効期限切れ',
+  `is_deleted` char(1) NOT NULL DEFAULT '1' COMMENT '削除済みフラグ',
+  `created_by` varchar(40) DEFAULT NULL COMMENT '作成者',
+  `created_at` datetime NOT NULL COMMENT '作成日時',
+  `updated_by` varchar(40) DEFAULT NULL COMMENT '更新者',
+  `updated_at` datetime NOT NULL COMMENT '更新日時',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='レター';

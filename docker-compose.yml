@@ -2,7 +2,7 @@ version: '3'
 
 services:
   db:
-    container_name: letterpack-db
+    container_name: lp-db
     image: mysql:5.7
     command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
     environment:
@@ -17,8 +17,8 @@ services:
       - default
 
   nginx:
-    container_name: letterpack-nginx
-    image: letterpack-nginx-dev
+    container_name: lp-nginx
+    image: lp-nginx-dev
     environment:
       TZ: Asia/Tokyo
     ports:
@@ -28,8 +28,8 @@ services:
     links:
       - go
   go:
-    container_name: letterpack-go
-    image: letterpack-go-dev
+    container_name: lp-go
+    image: lp-go-dev
     volumes:
       - ./go/src:/var/app/src
     command: bash -c "cd /var/app/src && realize start --server"

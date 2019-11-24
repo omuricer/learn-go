@@ -21,8 +21,8 @@ if [ "$FLG_P" = "TRUE" ]; then
     docker build -t mmy100-kurima-nginx -f ./nginx/Dockerfile_prod .
     docker build -t mmy100-kurima-php -f ./php/Dockerfile_prod .
 else
-    docker build -t letterpack-nginx-dev -f ./nginx/Dockerfile .
-    docker build -t letterpack-go-dev -f ./go/Dockerfile .
+    docker build -t lp-nginx-dev -f ./nginx/Dockerfile .
+    docker build -t lp-go-dev -f ./go/Dockerfile .
 fi
 
 exit 0

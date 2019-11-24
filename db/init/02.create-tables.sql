@@ -688,9 +688,7 @@ CREATE TABLE `letters` (
   `expire` datetime COMMENT '有効期限',
   `expired_at` datetime COMMENT '有効期限切れ',
   `is_deleted` char(1) NOT NULL DEFAULT '1' COMMENT '削除済みフラグ',
-  `created_by` varchar(40) DEFAULT NULL COMMENT '作成者',
   `created_at` datetime NOT NULL COMMENT '作成日時',
-  `updated_by` varchar(40) DEFAULT NULL COMMENT '更新者',
   `updated_at` datetime NOT NULL COMMENT '更新日時',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='レター';

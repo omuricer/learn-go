@@ -8,6 +8,9 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	// "mime/multipart"
+	"os"
+	"io"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -24,8 +27,8 @@ type Letter struct {
 	File          string    `json:"file"`
 	InnerFilePath string    `json:"InnerFilePath"`
 	DecryptKey    string    `json:"decryptKey"`
-	Expire        time.Time `json:"expire"`
-	ExpiredAt     time.Time `json:"expireAt"`
+	Expire        time.Time `json:"expire" gorm:"default:null"`
+	ExpiredAt     time.Time `json:"expireAt" gorm:"default:null"`
 	IsDeleted     string    `json:"isDeleted"`
 	CreatedAt     time.Time `json:"createdAt"`
 	UpdatedAt     time.Time `json:"updatesAt"`
@@ -76,24 +79,38 @@ func addLetter(w http.ResponseWriter, r *http.Request) {
 var decoder = schema.NewDecoder()
 
 type PostLetter struct {
-	from     string
-	fromMail string
+	From     string
+	FromMail string
+	File     string
 }
 
 func postLetter(w http.ResponseWriter, r *http.Request) {
 
-	err := r.ParseForm()
-	if err != nil {
-		// Handle error
+	if r.Header.Get("Content-Type") != "application/json" {
+		w.WriteHeader(http.StatusUnsupportedMediaType)
+		return
 	}
-	fmt.Println(r.PostForm)
+
+	// err := r.ParseForm()
+	// if err != nil {
+	// 	// Handle error
+	// }
+	// fmt.Println(r.PostForm)
+
+	// var postLetter PostLetter
+	// err = decoder.Decode(&postLetter, r.PostForm)
+	// if err != nil {
+	// 	// Handle err
+	// }
+	// fmt.Println(r.Form.Get("from"))
 
 	var postLetter PostLetter
-	err = decoder.Decode(&postLetter, r.PostForm)
+	err := json.NewDecoder(r.Body).Decode(&postLetter)
 	if err != nil {
-		// Handle err
+		panic(err)
 	}
-	fmt.Println(r.Form.Get("from"))
+	fmt.Println(postLetter)
+	defer r.Body.Close()
 
 	// TODO: バリデーションを実装する
 
@@ -105,21 +122,39 @@ func postLetter(w http.ResponseWriter, r *http.Request) {
 	db.LogMode(true)
 	defer db.Close()
 
+	// 時間データのサンプル。あとから使うのでとっておく
 	// str := "2020/01/01 10:00:00"
 	// layout := "2006/01/02 15:03:05"
 	// t, _ := time.Parse(layout, str)
 	letter := Letter{
-		From: r.Form.Get("from"),
-		// FromMail:      params["formMail"],
-		// File:          "file",
-		// InnerFilePath: "inner/file/path",
-		// DecryptKey:    "key",
-		// Expire:        t,
+		From: postLetter.From,
+		FromMail : postLetter.FromMail,
+		File: postLetter.File,
 	}
 
 	db.Create(&letter)
 	json.NewEncoder(w).Encode(letter)
 
+}
+
+func postFile(w http.ResponseWriter, r *http.Request) {
+
+	uploadFile, uploadFileHeader, err := r.FormFile("file")
+	if err != nil {
+		// upload error
+	}
+
+	file, err := os.Create("./" + uploadFileHeader.Filename)
+	if err != nil {
+		// file create error
+	}
+
+	size, err := io.Copy(file, uploadFile)
+	if err != nil {
+		// file write error
+	}
+
+	fmt.Println(size)
 }
 
 func updateArticle(w http.ResponseWriter, r *http.Request) {
@@ -138,6 +173,7 @@ func handleRequests() {
 	router.HandleFunc("/letter", addLetter).Methods("PUT")
 
 	router.HandleFunc("/letter", postLetter).Methods("POST")
+	router.HandleFunc("/file", postFile).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
